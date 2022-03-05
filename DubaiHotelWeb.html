@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Dubai Hotel</title>
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <!-- <script src="./node_modules/web3/dist/web3.min.js">
+    </script> -->
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+</head>
+<body onload="initClock()">
+    <div class="datetime">
+       <div class="date">
+         <span id="dayname">Day</span>,
+         <span id="month">Month</span>
+         <span id="daynum">00</span>,
+         <span id="year">Year</span>
+       </div>
+       <div class="time">
+         <span id="hour">00</span>:
+         <span id="minutes">00</span>:
+         <span id="seconds">00</span>
+         <span id="period">AM</span>
+       </div>
+     </div>
+     ขณะนี้เวลา 
+     <span id="timenow"></span>:
+     <script type="text/javascript">
+     function updateClock(){
+       var now = new Date();
+       var dname = now.getDay(),
+           mo = now.getMonth(),
+           dnum = now.getDate(),
+           yr = now.getFullYear(),
+           hou = now.getHours(),
+           min = now.getMinutes(),
+           sec = now.getSeconds(),
+           pe = "AM";
+ 
+           if(hou >= 12){
+             pe = "PM";
+           }
+           if(hou == 0){
+             hou = 12;
+           }
+           if(hou > 12){
+             hou = hou - 12;
+           }
+ 
+           Number.prototype.pad = function(digits){
+             for(var n = this.toString(); n.length < digits; n = 0 + n);
+             return n;
+           }
+ 
+           var months = ["January", "February", "March", "April", "May", "June", "July", "Augest", "September", "October", "November", "December"];
+           var week = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+           var ids = ["dayname", "month", "daynum", "year", "hour", "minutes", "seconds", "period"];
+           var values = [week[dname], months[mo], dnum.pad(2), yr, hou.pad(2), min.pad(2), sec.pad(2), pe];
+           for(var i = 0; i < ids.length; i++)
+           document.getElementById(ids[i]).firstChild.nodeValue = values[i];
+           var timenow = hour.textContent+":"+minutes.textContent+" "+period.textContent
+           $("#timenow").html(timenow);
+     }
+ 
+     function initClock(){
+       updateClock();
+       window.setInterval("updateClock()", 1);
+     }
+     </script>
+   <div class="container" align="center">
+       <h1>Dubai Hotel</h1>
+       <label class="col-lg-2 control-label">
+           SLS Dubai Hotel & Residences</label>
+       <img src = "images/SLS.jpg" width="450" alt ="SLS Dubai Hotel & Residences">
+       <label class="col-lg-2 control-label">0.01 ETH</label>
+       <button id="reserve1">reserve</button>
+
+       <label class="col-lg-2 control-label">
+           Caesars Palace Dubai</label>
+       <img src = "images/caesars-palace-dubai.jpg" width="450" alt ="Caesars Palace Dubai">
+       <label class="col-lg-2 control-label">0.025 ETH</label>
+       <button id="reserve2">reserve</button>
+
+       <label class="col-lg-2 control-label">
+           Hotel Sofitel Dubai Downtown</label>
+       <img src = "images/exterior.jpg" width="450" alt ="Hotel Sofitel Dubai Downtown">
+       <label class="col-lg-2 control-label">0.02 ETH</label>
+       <button id="reserve3">reserve</button>
+
+       <label class="col-lg-2 control-label">
+           Atlantis The Palm</label>
+       <img src = "images/atlantis-the-palm.jpg" width="450" alt ="Atlantis The Palm">
+       <label class="col-lg-2 control-label">0.03 ETH</label>
+       <button id="reserve4">reserve</button>
+
+
+       <label class="col-lg-2 control-label">
+           Dukes The Palm, a Royal Hideaway Hotel</label>
+       <img src = "images/skyline.jpg" width="450" alt ="Dukes The Palm, a Royal Hideaway Hotel">
+       <label class="col-lg-2 control-label">0.015 ETH</label>
+       <button id="reserve5">reserve</button>
+       <h2 id="result"></h2>
+   </div>
+   <table border="1" width = "100%" align="center">
+       <tr>
+           <th>Time</th>
+           <th>Hotel</th>
+           <th>Owner(address)</th>
+       </tr>
+       <tr>
+           <th id="time1" ></th>
+           <th id="hotel1" ></th>
+           <th id="owner1" ></th>
+       </tr>
+       <tr>
+           <th id="time2" ></th>
+           <th id="hotel2" ></th>
+           <th id="owner2" ></th>
+       </tr>
+       <tr>
+           <th id="time3"  ></th>
+           <th id="hotel3" ></th>
+           <th id="owner3" ></th>
+       </tr>
+       <tr>
+           <th id="time4"></th>
+           <th id="hotel4"></th>
+           <th id="owner4" ></th>
+       </tr>
+       <tr>
+           <th id="time5"></th>
+           <th id="hotel5"></th>
+           <th id="owner5"></th>
+       </tr>
+   </table>
+
+   
+   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+   </script>
+   <script>
+       
+        
+        async function loadWeb3() {
+            if (window.ethereum) {
+                window.web3 = new Web3(window.ethereum);
+                window.ethereum.enable();
+            }
+        }
+
+        let currentAccount = null;
+        window.ethereum
+            .request({ method: 'eth_accounts' })
+            .then(handleAccountsChanged)
+            .catch((err) => {
+            // Some unexpected error.
+            // For backwards compatibility reasons, if no accounts are available,
+            // eth_accounts will return an empty array.
+            console.error(err);
+            });
+
+        // Note that this event is emitted on page load.
+        // If the array of accounts is non-empty, you're already
+        // connected.
+        window.ethereum.on('accountsChanged', handleAccountsChanged);
+
+        // For now, 'eth_accounts' will continue to always return an array
+        function handleAccountsChanged(accounts) {
+            if (accounts.length === 0) {
+                // MetaMask is locked or the user has not connected any accounts
+                console.log('Please connect to MetaMask.');
+            } else if (accounts[0] !== currentAccount) {
+                currentAccount = accounts[0];
+                // Do any other work!
+            }
+        }
+
+        let abi = [
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "timestamp",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "hotelname",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "bytes32",
+				"name": "hash",
+				"type": "bytes32"
+			}
+		],
+		"name": "reserveAdded",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "text",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "reason",
+				"type": "string"
+			}
+		],
+		"name": "reserveError",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			}
+		],
+		"name": "checkReserve",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "t",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "h",
+				"type": "string"
+			}
+		],
+		"name": "reserve",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	}
+];
+
+        async function loadContract() {
+            return await new window.web3.eth.Contract(abi, '0x48857c172fc424479360Ec473Ad7bEF60372e116');
+        }
+
+        async function load() {
+            await loadWeb3();
+            window.contract = await loadContract();
+            updateStatus('Ready!');
+        }
+        
+        function updateStatus(status) {
+            const statusEl = document.getElementById('status');
+            statusEl.innerHTML = status;
+            console.log(status);
+        }
+
+        $("#reserve1").click(function() {
+            console.log(currentAccount);
+            var times = document.getElementById('timenow');
+            var timeToString;
+            if (times.outerHTML)
+                timeToString = times.outerHTML;
+            else if (XMLSerializer)
+                timeToString = new XMLSerializer().timeToString(times);
+            window.contract.methods.reserve(timeToString,"SLS Dubai Hotel & Residences")
+            .send({from: currentAccount, value: 10000000000000000}, function(error, result){
+                $("#result").html(result);
+            });
+            window.contract.once('reserveAdded', {}, function(error, event){
+                if (!error){
+                    console.log(event);
+                        $("#time1").html(event.returnValues.timestamp);
+                        $("#hotel1").html(event.returnValues.hotelname);
+                        $("#owner1").html(event.returnValues.from);
+                }
+            })
+        });
+
+        $("#reserve2").click(function() {
+            console.log(currentAccount);
+            var times = document.getElementById('timenow');
+            var timeToString;
+            if (times.outerHTML)
+                timeToString = times.outerHTML;
+            else if (XMLSerializer)
+                timeToString = new XMLSerializer().timeToString(times);
+            window.contract.methods.reserve(timeToString,"Caesars Palace Dubai")
+            .send({from: currentAccount, value: 25000000000000000}, function(error, result){
+                $("#result").html(result);
+            });
+            window.contract.once('reserveAdded', {}, function(error, event){
+                if (!error){
+                    console.log(event);
+                        $("#time2").html(event.returnValues.timestamp);
+                        $("#hotel2").html(event.returnValues.hotelname);
+                        $("#owner2").html(event.returnValues.from);
+                }
+            })
+        });
+
+        $("#reserve3").click(function() {
+            console.log(currentAccount);
+            var times = document.getElementById('timenow');
+            var timeToString;
+            if (times.outerHTML)
+                timeToString = times.outerHTML;
+            else if (XMLSerializer)
+                timeToString = new XMLSerializer().timeToString(times);
+            window.contract.methods.reserve(timeToString,"Hotel Sofitel Dubai Downtown")
+            .send({from: currentAccount, value: 20000000000000000}, function(error, result){
+                $("#result").html(result);
+            });
+            window.contract.once('reserveAdded', {}, function(error, event){
+                if (!error){
+                    console.log(event);
+                        $("#time3").html(event.returnValues.timestamp);
+                        $("#hotel3").html(event.returnValues.hotelname);
+                        $("#owner3").html(event.returnValues.from);
+                }
+            })
+        });
+
+        $("#reserve4").click(function() {
+            console.log(currentAccount);
+            var times = document.getElementById('timenow');
+            var timeToString;
+            if (times.outerHTML)
+                timeToString = times.outerHTML;
+            else if (XMLSerializer)
+                timeToString = new XMLSerializer().timeToString(times);
+            window.contract.methods.reserve(timeToString,"Atlantis The Palm")
+            .send({from: currentAccount, value: 30000000000000000}, function(error, result){
+                $("#result").html(result);
+            });
+            window.contract.once('reserveAdded', {}, function(error, event){
+                if (!error){
+                    console.log(event);
+                        $("#time4").html(event.returnValues.timestamp);
+                        $("#hotel4").html(event.returnValues.hotelname);
+                        $("#owner4").html(event.returnValues.from);
+                }
+            })
+        });
+
+        $("#reserve5").click(function() {
+            console.log(currentAccount);
+            var times = document.getElementById('timenow');
+            var timeToString;
+            if (times.outerHTML)
+                timeToString = times.outerHTML;
+            else if (XMLSerializer)
+                timeToString = new XMLSerializer().timeToString(times);
+            window.contract.methods.reserve(timeToString,"Dukes The Palm, a Royal Hideaway Hotel")
+            .send({from: currentAccount, value: 15000000000000000}, function(error, result){
+                $("#result").html(result);
+            });
+            window.contract.once('reserveAdded', {}, function(error, event){
+                if (!error){
+                    console.log(event);
+                        $("#time5").html(event.returnValues.timestamp);
+                        $("#hotel5").html(event.returnValues.hotelname);
+                        $("#owner5").html(event.returnValues.from);
+                }
+            })
+        });
+
+
+        load();
+    </script>
+</body>
+</html>
